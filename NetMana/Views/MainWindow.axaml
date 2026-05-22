@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NetMana.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="200"
+        x:Class="NetMana.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="NetMana"
+        Background="{x:Null}"
+        TransparencyLevelHint="Transparent"
+        Width="350"
+        Height="500"
+        CanResize="False"
+        Topmost="True"
+        WindowStartupLocation="Manual"
+        
+        >
+
+    <i:Interaction.Behaviors>
+        <ia:EventTriggerBehavior EventName="Loaded">
+            <ia:InvokeCommandAction Command="{Binding LoadWifiNetworksCommand}" />
+        </ia:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    
+    <Grid>
+        <ProgressBar IsIndeterminate="True" 
+                     IsVisible="{Binding IsLoading}"
+                     VerticalAlignment="Top"/>
+        
+        <Panel IsVisible="{Binding !IsLoading}">
+            <!-- Main List -->
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding WifiList}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WifiActionCommand}"
+                                    CommandParameter="{Binding}"
+                                    Margin="10"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Top">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="HotPink" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="CornerRadius" Value="20" />
+                                        <Setter Property="Padding" Value="15,10" />
+                                    </Style>
+                                    <Style Selector="Button.refused /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" Value="Red" />
+                                        <Setter Property="CornerRadius" Value="20" />
+                                    </Style>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" Value="LightBlue" />
+                                        <Setter Property="CornerRadius" Value="20" />
+                                    </Style>
+                                    <Style Selector="Button.refused:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" Value="DarkRed" />
+                                        <Setter Property="CornerRadius" Value="20" />
+                                    </Style>
+                                </Button.Styles>
+                                <Classes.refused>
+                                    <Binding Path="IsConnectionRefused" />
+                                </Classes.refused>
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Grid.Column="0" 
+                                               Text="{Binding Ssid}" 
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left"/>
+                                    <StackPanel Grid.Column="1" 
+                                                Orientation="Horizontal" 
+                                                VerticalAlignment="Center"
+                                                Spacing="10">
+                                        <ProgressBar Value="{Binding StrengthInt}"
+                                                     Minimum="0" Maximum="100"
+                                                     Width="100" Height="10"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="Cyan"
+                                                     Background="HotPink"/>
+                                        <TextBlock Text="{Binding StrengthInt, StringFormat='\{0\}%'}"
+                                                   VerticalAlignment="Center"
+                                                   Width="40"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Password Prompt Overlay -->
+            <Border Background="#AA000000" IsVisible="{Binding IsPasswordPromptVisible}">
+                <Border Background="White" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center" 
+                        Padding="20" 
+                        CornerRadius="8">
+                    <StackPanel Spacing="10" Width="300">
+                        <TextBlock Text="Enter Password" Foreground="Black" FontWeight="Bold"/>
+                        <TextBox Text="{Binding CurrentPasswordInput}" PasswordChar="*" Watermark="Password">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding ConfirmPasswordCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                            <Button Content="Cancel" Command="{Binding CancelPasswordCommand}"/>
+                            <Button Content="Connect" Command="{Binding ConfirmPasswordCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Panel>
+    </Grid>
+
+</Window>
