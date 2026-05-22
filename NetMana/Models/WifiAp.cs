@@ -7,7 +7,7 @@ using Tmds.DBus;
 
 namespace NetMana.Models;
 
-public partial class wifi_ap : ObservableObject
+public partial class WifiAp : ObservableObject
 {
     [ObservableProperty]
     private string _ssid = string.Empty;
@@ -26,7 +26,7 @@ public partial class wifi_ap : ObservableObject
 
     public int StrengthInt => (int)Strength;
     
-    public static async Task<List<wifi_ap>> GetSsidsInRangeAsync()
+    public static async Task<List<WifiAp>> GetSsidsInRangeAsync()
     {
         var connection = new Connection(Address.System);
         await connection.ConnectAsync();
@@ -55,7 +55,7 @@ public partial class wifi_ap : ObservableObject
         }
 
         if (wifiDevicePath == default)
-            return new List<wifi_ap>();
+            return new List<WifiAp>();
 
         var wireless = connection.CreateProxy<IWireless>(
             "org.freedesktop.NetworkManager",
@@ -67,7 +67,7 @@ public partial class wifi_ap : ObservableObject
 
         var accessPointPaths = await wireless.GetAccessPointsAsync();
 
-        var result = new List<wifi_ap>();
+        var result = new List<WifiAp>();
 
         foreach (var accessPointPath in accessPointPaths)
         {
@@ -82,7 +82,7 @@ public partial class wifi_ap : ObservableObject
             if (string.IsNullOrWhiteSpace(ssid))
                 continue;
                 
-            var res = new wifi_ap();
+            var res = new WifiAp();
             res.Ssid = ssid;
             res.Strength = props.Strength;
             res.MacAddress = props.HwAddress;

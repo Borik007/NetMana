@@ -34,7 +34,7 @@
         <Panel IsVisible="{Binding !IsLoading}">
             <!-- Main List -->
             <ScrollViewer>
-                <ItemsControl ItemsSource="{Binding WifiList}">
+                <ItemsControl ItemsSource="{Binding WifiData.WifiList}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical"/>
