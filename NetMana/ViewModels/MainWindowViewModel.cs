@@ -17,7 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
     
-    public ObservableCollection<wifi_ap> WifiList { get; } = new();
+    public WifiApData WifiData { get; } = new();
 
     [ObservableProperty]
     private bool _isPasswordPromptVisible;
@@ -25,33 +25,38 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _currentPasswordInput = string.Empty;
 
-    private wifi_ap? _pendingWifi;
+    private WifiAp? _pendingWifi;
+
+    public MainWindowViewModel()
+    {
+        WifiData.LoadData();
+    }
 
     [RelayCommand]
     private async Task LoadWifiNetworksAsync()
     {
         IsLoading = true;
-        WifiList.Clear();
+        WifiData.WifiList.Clear();
         
         try
         {
-            var ap_list = await wifi_ap.GetSsidsInRangeAsync();
+            var ap_list = await WifiAp.GetSsidsInRangeAsync();
             
             foreach (var ap in ap_list)
             {
                 int index = -1;
-                for (int i = 0; i < WifiList.Count; i++)
+                for (int i = 0; i < WifiData.WifiList.Count; i++)
                 {
-                    if(WifiList[i].Ssid == ap.Ssid)
+                    if(WifiData.WifiList[i].Ssid == ap.Ssid)
                     {
                         index = i;
                         break;
                     }
                 }
                 if(index == -1)
-                    WifiList.Add(ap);
-                else if ((int)WifiList[index].Strength < (int)ap.Strength && WifiList[index].Ssid == ap.Ssid)
-                    WifiList[index] =  ap;
+                    WifiData.WifiList.Add(ap);
+                else if ((int)WifiData.WifiList[index].Strength < (int)ap.Strength && WifiData.WifiList[index].Ssid == ap.Ssid)
+                    WifiData.WifiList[index] =  ap;
             }
         }
         finally
@@ -62,7 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private async Task WifiAction(wifi_ap ap)
+    private async Task WifiAction(WifiAp ap)
     {
         if (string.IsNullOrEmpty(ap.Password))
         {
@@ -83,6 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _pendingWifi.Password = CurrentPasswordInput ?? string.Empty;
             IsPasswordPromptVisible = false;
+            WifiData.SaveData();
             await WifiConnect(_pendingWifi);
             _pendingWifi = null;
         }
@@ -95,7 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _pendingWifi = null;
     }
 
-    private async Task WifiConnect(wifi_ap ap)
+    private async Task WifiConnect(WifiAp ap)
     {
         var connection = new Connection(Address.System);
         await connection.ConnectAsync();
@@ -190,7 +196,7 @@ public partial class MainWindowViewModel : ViewModelBase
             wifiDevicePath,
             targetAccessPointPath);
     }
-    private void ConnectionRefused(wifi_ap ap)
+    private void ConnectionRefused(WifiAp ap)
     {
         ap.IsConnectionRefused = true;
         // App returns to main window (IsPasswordPromptVisible = false)
