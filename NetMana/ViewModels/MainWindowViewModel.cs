@@ -17,7 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
     
-    public WifiApData WifiData { get; } = new();
+    public WifiApData WifiData { get; }
 
     [ObservableProperty]
     private bool _isPasswordPromptVisible;
@@ -29,6 +29,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
+        WifiData = new WifiApData();
         WifiData.LoadData();
     }
 
@@ -58,6 +59,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 else if ((int)WifiData.WifiList[index].Strength < (int)ap.Strength && WifiData.WifiList[index].Ssid == ap.Ssid)
                     WifiData.WifiList[index] =  ap;
             }
+            WifiData.MergeData();
         }
         finally
         {
