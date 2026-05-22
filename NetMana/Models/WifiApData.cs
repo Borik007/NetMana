@@ -13,7 +13,7 @@ public partial class WifiApData : ObservableObject
 {
 
     public ObservableCollection<WifiAp> WifiList { get; set; } = new ObservableCollection<WifiAp>();
-    
+    public ObservableCollection<WifiSavedata> WifiSavedata { get; set; } = new ObservableCollection<WifiSavedata>();
     public void SaveData()
     {
         string path = GetDataPath("NetMana");
@@ -22,7 +22,11 @@ public partial class WifiApData : ObservableObject
         path = System.IO.Path.Combine(path, "WifiAp");
         
         var listToSave = WifiList.Where(ap => !string.IsNullOrEmpty(ap.Password)).ToList();
-        File.WriteAllText(path, JsonSerializer.Serialize(listToSave));
+        foreach (var ap in listToSave)
+        {
+            WifiSavedata.Add(new WifiSavedata { Ssid = ap.Ssid, Password = ap.Password });
+        }
+        File.WriteAllText(path, JsonSerializer.Serialize(WifiSavedata));
     }
     public void LoadData()
     {
@@ -30,14 +34,21 @@ public partial class WifiApData : ObservableObject
         path = System.IO.Path.Combine(path, "WifiAp");
         if (File.Exists(path))
         {
-            var loadedList = JsonSerializer.Deserialize<List<WifiAp>>(File.ReadAllText(path));
-            if (loadedList != null)
+            var loadedData = JsonSerializer.Deserialize<List<WifiSavedata>>(File.ReadAllText(path));
+            if (loadedData != null)
             {
-                WifiList.Clear();
-                foreach (var ap in loadedList)
-                {
-                    WifiList.Add(ap);
-                }
+                WifiSavedata = new ObservableCollection<WifiSavedata>(loadedData);
+            }
+        }
+    }
+
+    public void MergeData()
+    {
+        foreach (var ap in WifiList)
+        {
+            if(WifiSavedata.Any(saved => saved.Ssid == ap.Ssid))
+            {
+                ap.Password = WifiSavedata.First(saved => saved.Ssid == ap.Ssid).Password;
             }
         }
     }
@@ -59,4 +70,9 @@ public partial class WifiApData : ObservableObject
 
         return fullAppPath;
     }
+}
+public class WifiSavedata
+{
+    public string Ssid { get; set; }
+    public string Password { get; set; }
 }

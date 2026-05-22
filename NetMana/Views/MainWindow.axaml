@@ -98,7 +98,7 @@
 
             <!-- Password Prompt Overlay -->
             <Border Background="#AA000000" IsVisible="{Binding IsPasswordPromptVisible}">
-                <Border Background="White" 
+                <Border Background="HotPink" 
                         VerticalAlignment="Center" 
                         HorizontalAlignment="Center" 
                         Padding="20" 
