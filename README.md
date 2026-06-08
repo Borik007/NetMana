@@ -7,3 +7,4 @@ network manager
 
 Wifi credentials are saved to unencrypted file and can be easily edited(or added manually - app must be closed!)
 
+This project utilizes Avalonia and Tmds.DBus
